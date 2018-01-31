@@ -1,26 +1,15 @@
-// ConApp.cpp : Defines the entry point for the console application.
-//
-/*
-#include "stdafx.h"
-int _tmain(int argc, _TCHAR* argv[])
-{
-	return 0;
-}
-*/
-//#include "stdafx.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "time.h"
 #include "math.h"
-//#include "c_timer.h"
 #include <papi.h>
 #include "papi_timer.h"
 #define NUM 5
 
-double *A, *B, *C, *D;
+double *A, *B, *C;
 int size[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
-//int size[] = {10, 20, 30, 40, 50};//, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
 
+/*dynamically allocating Matrices as 1D linear array and then initializing with random floating values*/
 void init(int N)
 {
 	A = (double*) calloc(N, sizeof(double));
@@ -38,20 +27,15 @@ void init(int N)
 		printf("Error C");
 		exit(1);
 	}
-	D = (double*) calloc(N, sizeof(double));
-	if(D==NULL){
-		printf("Error D");
-		exit(1);
-	}
 
 	for(int i=0;i<N;i++){
 		A[i] = (double)rand()*100/RAND_MAX;
 		B[i] = (double)rand()*100/RAND_MAX;
 		C[i] = (double)rand()*100/RAND_MAX;
-		D[i] = C[i];
 	}
 }
 
+/*Matrix multiplication using IJK combination*/
 void dgemmIJK(int N)
 {
 	for(int i=0; i<N; i++)
@@ -64,6 +48,7 @@ void dgemmIJK(int N)
 		}
 }
 
+/*Matrix multiplication using IKJ combination*/
 void dgemmIKJ(int N)
 {
 	for(int i=0; i<N; i++){
@@ -75,6 +60,7 @@ void dgemmIKJ(int N)
 	}
 }
 
+/*Matrix multiplication using JIK combination*/
 void dgemmJIK(int N)
 {
 	for(int j=0; j<N; j++){
@@ -88,6 +74,7 @@ void dgemmJIK(int N)
 	}
 }
 
+/*Matrix multiplication using JKI combination*/
 void dgemmJKI(int N)
 {
 	for(int j=0; j<N; j++){
@@ -95,11 +82,11 @@ void dgemmJKI(int N)
 			for(int i=0; i<N; i++){
 				C[j*N+i] += A[j*N+k] * B[k*N+i];
 			}
-			//C[j*N+i] = cji;
 		}
 	}
 }
 
+/*Matrix multiplication using KIJ combination*/
 void dgemmKIJ(int N)
 {
 	for(int k=0; k<N; k++){
@@ -113,6 +100,7 @@ void dgemmKIJ(int N)
 	}
 }
 
+/*Matrix multiplication using KJI combination*/
 void dgemmKJI(int N)
 {
 	for(int k=0; k<N; k++){
@@ -125,6 +113,7 @@ void dgemmKJI(int N)
 	}
 }
 
+/*printing Matrices to check or debug*/
 void print(int N, int AB)
 {
 	int n = sqrt(N);
@@ -156,15 +145,9 @@ void print(int N, int AB)
 	}
 	printf("]\n");
 
-	// printf("D=[");
-	// for(int i=0;i<N;i++)
-	// 	printf("%.2lf,", D[i]);
-	// printf("]\n");	
-	for(int i=0;i<N;i++)
-		C[i] = D[i];	
-	
 }
 
+/*function used to handle PAPI library's error situation (got from PAPI tutorial)*/
 void test_fail(char *file, int line, char *call, int retval){
     printf("%s\tFAILED\nLine # %d\n", file, line);
     if ( retval == PAPI_ESYS ) {
@@ -183,8 +166,8 @@ void test_fail(char *file, int line, char *call, int retval){
     exit(1);
 }
 
-/*
-void calcTime( void(*f)(int), char* com )
+/*Calculate execution time using C timer function (was not used to draw plots)*/
+/*void calcTime( void(*f)(int), char* com )
 {
 	int len = sizeof(size)/sizeof(size[0]);
 	double btime, etime;
@@ -204,9 +187,9 @@ void calcTime( void(*f)(int), char* com )
 		avg = sum/NUM;
 		printf("Average runtime of %s for n=%d is %lf \n", com, n, avg);
 	}
-}
-*/
+}*/
 
+/*Calculate Gflop/s and execution time using PAPI library's time function*/
 void calcPapiTime(void(*f)(int), char* com)
 {
 	int len = sizeof(size)/sizeof(size[0]);
@@ -222,28 +205,28 @@ void calcPapiTime(void(*f)(int), char* com)
 		init(n*n);
 		for(int j=0; j<NUM; j++){
 			btime = get_cur_time();
-			//dgemmIJK(n);
 			(*f)(n);
 			etime = get_cur_time();
 			sum += (etime-btime);
-			//printf("Runtime of %s for n=%d is %lf \n", com, n, (etime-btime));
 		}
 		avg = sum/NUM;
 		gflop = (2.0*n*n*n)/(avg*1000000000.0);
-		//printf("Average runtime of %s for n=%d is %lf \n", com, n, avg);
 		printf("%s, %d, %lf, %lf \n", com, n, avg, gflop);
+	free(A);
+	free(B);
+	free(C);
 	}
 }
 
+/*Calculate cache miss rate using PAPI library's high level events*/
 void calcPapiEvents(void(*f)(int), char* com)
 {
 	int len = sizeof(size)/sizeof(size[0]);
 	int Events[] = {PAPI_L1_TCM, PAPI_L2_TCM, PAPI_L1_TCH, PAPI_L1_TCA};
 	int elen = sizeof(Events)/sizeof(Events[0]);
-	long long values[4];	//should be dynamcally allocated
+	long long values[4];
 	int retval;
 
-	printf("Order, N, L1_TCM, L2_TCM, L1_TCH, L1_TCA, L1_Miss_Rate\n");
 	for(int i=0; i<len; i++){
 		int n = size[i];
 		init(n*n);
@@ -252,120 +235,36 @@ void calcPapiEvents(void(*f)(int), char* com)
 			test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
 		
 		(*f)(n);
-		//dgemmIJK(n);
 
 		if ((retval=PAPI_stop_counters(values, elen)) != PAPI_OK)
 			test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
 
 		printf("%s, %d, %d, %d, %d, %d, %lf\n", com, n, values[0], values[1], values[2], values[3], values[0]*100.0/values[3]); 	
-	    //printf("L1_TCM=%d, L2_TCM=%d of %s for n=%d\n", values[0], values[1], com, n);
-	    //printf("L1_TCM=%d, L2_TCM=%d, L1_TCH=%d, PAPI_L1_TCA=%d of %s for n=%d\n", values[0], values[1], values[2], values[3], com, n);
-	    //printf("%s, %d, %d, %d, %d, %d\n", com, n, values[0], values[1], values[2], values[3]);
-
-/*		if ((retval=PAPI_start_counters(Events, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-		dgemmIKJ(n);
-		if ((retval=PAPI_stop_counters(values, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	    printf("%d, IKJ, %d, %d, %d, %d, %.2f\n", n, values[0], values[1], values[2], values[3], values[0]*100.0/values[3]);
-
-		if ((retval=PAPI_start_counters(Events, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-		dgemmJIK(n);
-		if ((retval=PAPI_stop_counters(values, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	    //printf("JIK, %d, %d, %d, %d, %d\n", n, values[0], values[1], values[2], values[3]);
-		printf("%d, JIK, %d, %d, %d, %d, %.2f\n", n, values[0], values[1], values[2], values[3], values[0]*100.0/values[3]);
-
-		if ((retval=PAPI_start_counters(Events, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-		dgemmJKI(n);
-		if ((retval=PAPI_stop_counters(values, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	    //printf("JKI, %d, %d, %d, %d, %d\n", n, values[0], values[1], values[2], values[3]);
-		printf("%d, JKI, %d, %d, %d, %d, %.2f\n", n, values[0], values[1], values[2], values[3], values[0]*100.0/values[3]);
-
-		if ((retval=PAPI_start_counters(Events, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-		dgemmKIJ(n);
-		if ((retval=PAPI_stop_counters(values, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	    //printf("KIJ, %d, %d, %d, %d, %d\n", n, values[0], values[1], values[2], values[3]);
-		printf("%d, KIJ, %d, %d, %d, %d, %.2f\n", n, values[0], values[1], values[2], values[3], values[0]*100.0/values[3]);
-
-		if ((retval=PAPI_start_counters(Events, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-		dgemmKJI(n);
-		if ((retval=PAPI_stop_counters(values, elen)) != PAPI_OK)
-			test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	    //printf("KJI, %d, %d, %d, %d, %d\n", n, values[0], values[1], values[2], values[3]);
-		printf("%d, KJI, %d, %d, %d, %d, %.2f\n", n, values[0], values[1], values[2], values[3], values[0]*100.0/values[3]);
-*/
 		free(A);
 		free(B);
 		free(C);
-		free(D);
 	}
-	//printf("%s\tPASSED\n", __FILE__);
-	//PAPI_shutdown();
 }
 
 int main()
 {
-	int retval;
 	srand(time(NULL));
-	if ((retval=PAPI_library_init(PAPI_VER_CURRENT)) != PAPI_VER_CURRENT){
-		test_fail(__FILE__, __LINE__, "PAPI_library_init", retval);
-	}
 
-/*	clock_t start_t, end_t;
-	double diff_t;
-	const int N = 3;
-	start_t = clock();	
-	double btime = get_cur_time();
-
-	init(N*N);	
-	print(N*N,1);
-	dgemmIJK(N);
-	print(N*N,0);
-	dgemmIKJ(N);
-	print(N*N,0);
-	dgemmJIK(N);
-	print(N*N,0);
-	dgemmJKI(N);
-	print(N*N,0);
-	printf("Hello World\n");
-
-	end_t = clock();
-	double etime = get_cur_time();
-	diff_t = (double)(end_t-start_t)/CLOCKS_PER_SEC;
-	printf("Execution time of IJK = %f\n", diff_t);
-	printf("Execution time = %f\n", etime-btime);
-
-	calcTime(dgemmIJK, "IJK");
-	calcTime(dgemmIKJ, "IKJ");
-	calcTime(dgemmJIK, "JIK");
-	calcTime(dgemmJKI, "JKI");
-*/
+	printf("Order, N, Execution Time, Gflop/s\n");
 	calcPapiTime(dgemmIJK, "IJK");
 	calcPapiTime(dgemmIKJ, "IKJ");
 	calcPapiTime(dgemmJIK, "JIK");
 	calcPapiTime(dgemmJKI, "JKI");
 	calcPapiTime(dgemmKIJ, "KIJ");
 	calcPapiTime(dgemmKJI, "KJI");
+	
+	printf("Order, N, L1_TCM, L2_TCM, L1_TCH, L1_TCA, L1_Miss_Rate\n");
+	calcPapiEvents(dgemmIJK, "IJK");
+	calcPapiEvents(dgemmIKJ, "IKJ");
+	calcPapiEvents(dgemmJIK, "JIK");
+	calcPapiEvents(dgemmJKI, "JKI");
+	calcPapiEvents(dgemmKIJ, "KIJ");
+	calcPapiEvents(dgemmKJI, "KJI");	
 
-	// calcPapiEvents(dgemmIJK, "IJK");
-	// calcPapiEvents(dgemmIKJ, "IKJ");
-	// calcPapiEvents(dgemmJIK, "JIK");
-	// calcPapiEvents(dgemmJKI, "JKI");
-	// calcPapiEvents(dgemmKIJ, "KIJ");
-	// calcPapiEvents(dgemmKJI, "KJI");	
-
-	// free(A);
-	// free(B);
-	// free(C);
-	// free(D);
-
-	PAPI_shutdown();
 	return 0;
 }

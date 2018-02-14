@@ -1,0 +1,25 @@
+Login node
+Clock_rate=2600 Mhz
+% clock      MFLOP  ROUTINE/PROBLEM
+=======  =========  ===============
+   98.7     2566.6  Chosen kgemm
+   97.9     2544.2  Generated kgemm
+  101.4     2636.3  kgemmNT
+  100.5     2612.8  kgemmTN
+   35.6      926.7  kgemvN
+   37.8      981.5  kgemvT
+   15.9      412.9  kger
+   98.5     2559.8  N=1600 GEMM
+   
+ahmesh@aprun2:~/ATLAS/APRUN> cat bin/INSTALL_LOG/dPerfSumm.txt 
+Clock_rate=2500 Mhz
+% clock      MFLOP  ROUTINE/PROBLEM
+=======  =========  ===============
+   94.6     2365.2  Chosen kgemm
+   93.7     2343.3  Generated kgemm
+   97.4     2433.9  kgemmNT
+   98.3     2457.5  kgemmTN
+   50.5     1263.2  kgemvN
+   59.3     1482.5  kgemvT
+   26.1      652.0  kger
+   93.6     2340.4  N=1600 GEMM

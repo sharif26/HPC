@@ -1,0 +1,12 @@
+==============================================================================
+				Sequential Matrix Multiplication
+
+==============================================================================
+
+How to compile & run the program
+--------------------------------------------------------------------------
+* Copy c_timer.h and c_timer.c to the current directory if its not already there.
+* Just run the make file to compile and generate binary file, so on the current directory run:
+	$ make
+* Now you can run the binary file using pbs script provided or run the binary on aprun node:
+	$ aprun -n 1 ./matblock.o 

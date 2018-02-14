@@ -51,10 +51,12 @@ void dgemmIJK(int N)
 /*Matrix multiplication using IKJ combination*/
 void dgemmIKJ(int N)
 {
+	double r;
 	for(int i=0; i<N; i++){
 		for(int k=0; k<N; k++){
+			r = A[i*N+k];
 			for(int j=0; j<N; j++){
-				C[i*N+j] += A[i*N+k] * B[k*N+j];
+				C[i*N+j] += r * B[k*N+j];
 			}
 		}
 	}
@@ -63,13 +65,16 @@ void dgemmIKJ(int N)
 /*Matrix multiplication using JIK combination*/
 void dgemmJIK(int N)
 {
+	double r;
 	for(int j=0; j<N; j++){
 		for(int i=0; i<N; i++){
-			double cji = C[j*N+i];
+			//double cji = C[j*N+i];
+			double cji = C[i*N+j];
 			for(int k=0; k<N; k++){
 				cji += A[j*N+k] * B[k*N+i];
 			}
-			C[j*N+i] = cji;
+			//C[j*N+i] = cji;
+			C[i*N+j] = cji;
 		}
 	}
 }
@@ -77,10 +82,13 @@ void dgemmJIK(int N)
 /*Matrix multiplication using JKI combination*/
 void dgemmJKI(int N)
 {
+	double r;
 	for(int j=0; j<N; j++){
 		for(int k=0; k<N; k++){
+			r = B[k*N+j];
 			for(int i=0; i<N; i++){
-				C[j*N+i] += A[j*N+k] * B[k*N+i];
+				//C[j*N+i] += A[j*N+k] * B[k*N+i];
+				C[i*N+j] += A[i*N+k] * r;
 			}
 		}
 	}
@@ -89,13 +97,16 @@ void dgemmJKI(int N)
 /*Matrix multiplication using KIJ combination*/
 void dgemmKIJ(int N)
 {
+	double r;
 	for(int k=0; k<N; k++){
 		for(int i=0; i<N; i++){
-			double cki = C[k*N+i];
+			//double cki = C[k*N+i];
+			r = A[i*N+k];
 			for(int j=0; j<N; j++){
-				cki += A[k*N+j] * B[j*N+i];
+				//cki += A[k*N+j] * B[j*N+i];
+				C[i*N+j] += r * B[k*N+j];
 			}
-			C[k*N+i] = cki;
+			//C[k*N+i] = cki;
 		}
 	}
 }
@@ -103,10 +114,13 @@ void dgemmKIJ(int N)
 /*Matrix multiplication using KJI combination*/
 void dgemmKJI(int N)
 {
+	double r;
 	for(int k=0; k<N; k++){
 		for(int j=0; j<N; j++){
+			r = B[k*N+j];
 			for(int i=0; i<N; i++){
-				C[k*N+i] += A[k*N+j] * B[j*N+i];
+				//C[k*N+i] += A[k*N+j] * B[j*N+i];
+				C[i*N+j] += A[i*N+k] * r;
 			}
 		}
 
@@ -126,10 +140,10 @@ void print(int N, int AB)
 			else printf(",");
 		}
 		printf("]\n");
-	
+
 		printf("B=[");
 		for(int i=0;i<N;i++){
-			if( i%n == 0 ) printf("[");			
+			if( i%n == 0 ) printf("[");
 			printf("%.2lf", B[i]);
 			if( (i+1)%n == 0 ) printf("],");
 			else printf(",");
@@ -144,7 +158,6 @@ void print(int N, int AB)
 		else printf(",");
 	}
 	printf("]\n");
-
 }
 
 /*function used to handle PAPI library's error situation (got from PAPI tutorial)*/
@@ -166,29 +179,6 @@ void test_fail(char *file, int line, char *call, int retval){
     exit(1);
 }
 
-/*Calculate execution time using C timer function (was not used to draw plots)*/
-/*void calcTime( void(*f)(int), char* com )
-{
-	int len = sizeof(size)/sizeof(size[0]);
-	double btime, etime;
-	for(int i=0; i<len; i++)
-	{
-		int n = size[i];
-		double sum = 0.0, avg = 0.0;
-		init(n*n);
-		for(int j=0; j<NUM; j++){
-			btime = get_cur_time();
-			//dgemmIJK(n);
-			(*f)(n);
-			etime = get_cur_time();
-			sum += (etime-btime);
-			//printf("Runtime of %s for n=%d is %lf \n", com, n, (etime-btime));
-		}
-		avg = sum/NUM;
-		printf("Average runtime of %s for n=%d is %lf \n", com, n, avg);
-	}
-}*/
-
 /*Calculate Gflop/s and execution time using PAPI library's time function*/
 void calcPapiTime(void(*f)(int), char* com)
 {
@@ -196,7 +186,7 @@ void calcPapiTime(void(*f)(int), char* com)
 	double btime, etime, gflop;
 	if (PAPI_library_init(PAPI_VER_CURRENT) != PAPI_VER_CURRENT) {
 		printf("PAPI can not be initialized!");
-		exit(1);	
+		exit(1);
 	}
 	for(int i=0; i<len; i++)
 	{
@@ -233,13 +223,13 @@ void calcPapiEvents(void(*f)(int), char* com)
 
 		if ((retval=PAPI_start_counters(Events, elen)) != PAPI_OK)
 			test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-		
+
 		(*f)(n);
 
 		if ((retval=PAPI_stop_counters(values, elen)) != PAPI_OK)
 			test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
 
-		printf("%s, %d, %d, %d, %d, %d, %lf\n", com, n, values[0], values[1], values[2], values[3], values[0]*100.0/values[3]); 	
+		printf("%s, %d, %lld, %lld, %lld, %lld, %lf\n", com, n, values[0], values[1], values[2], values[3], values[0]*100.0/values[3]);
 		free(A);
 		free(B);
 		free(C);
@@ -249,22 +239,21 @@ void calcPapiEvents(void(*f)(int), char* com)
 int main()
 {
 	srand(time(NULL));
-
-	printf("Order, N, Execution Time, Gflop/s\n");
+	
+ 	printf("Order, N, Execution Time, Gflop/s\n");
 	calcPapiTime(dgemmIJK, "IJK");
 	calcPapiTime(dgemmIKJ, "IKJ");
 	calcPapiTime(dgemmJIK, "JIK");
 	calcPapiTime(dgemmJKI, "JKI");
 	calcPapiTime(dgemmKIJ, "KIJ");
 	calcPapiTime(dgemmKJI, "KJI");
-	
+
 	printf("Order, N, L1_TCM, L2_TCM, L1_TCH, L1_TCA, L1_Miss_Rate\n");
 	calcPapiEvents(dgemmIJK, "IJK");
 	calcPapiEvents(dgemmIKJ, "IKJ");
 	calcPapiEvents(dgemmJIK, "JIK");
 	calcPapiEvents(dgemmJKI, "JKI");
 	calcPapiEvents(dgemmKIJ, "KIJ");
-	calcPapiEvents(dgemmKJI, "KJI");	
-
+	calcPapiEvents(dgemmKJI, "KJI"); 
 	return 0;
 }

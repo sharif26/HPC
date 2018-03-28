@@ -1,0 +1,58 @@
+#!/bin/bash 
+#PBS -l nodes=8:ppn=32 
+#PBS -l walltime=10:55:00 
+#PBS -N my_job 
+#PBS -q cpu 
+#PBS -e /N/u/ahmesh/BigRed2/assign3/log 
+#PBS -o /N/u/ahmesh/BigRed2/assign3/log 
+#PBS -V 
+
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 64
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 128
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 256
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 512
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 1024
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 2048
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 4096
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 8192
+aprun -n 1 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 16384
+
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 64
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 128
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 256
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 512
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 1024
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 2048
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 4096
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 8192
+aprun -n 4 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 16384 
+
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 64
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 128
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 256
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 512
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 1024
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 2048
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 4096
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 8192
+aprun -n 16 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 16384 
+
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 64
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 128
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 256
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 512
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 1024
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 2048
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 4096 
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 8192
+aprun -n 64 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 16384
+
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 64
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 128
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 256
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 512
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 1024
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 2048
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 4096
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 8192
+aprun -n 256 /N/u/ahmesh/BigRed2/assign3/mpi/Summa.o 16384
